@@ -5,6 +5,7 @@ import cv2
 from model import get_model
 from keras import backend as K
 from noise_model import get_noise_model
+import tensorflow as tf
 
 
 def get_args():
@@ -25,9 +26,13 @@ def get_args():
 
 
 def get_image(image):
-    image = np.clip(image, 0, 255)
+    image = np.clip(image, 0.0, 255.0)
     return image.astype(dtype=np.uint8)
 
+def tf_log10(x):
+    numerator = tf.log(x)
+    denominator = tf.log(tf.constant(10, dtype=numerator.dtype))
+    return numerator / denominator
 
 def main():
     args = get_args()
@@ -57,8 +62,9 @@ def main():
         out_image[:, w:w * 2] = noise_image
         out_image[:, w * 2:] = denoised_image
         max_pixel = 255.0   #changes from here
-        denoised_image = K.clip(denoised_image, 0.0, 255.0)
+        denoised_image = np.clip(denoised_image, 0.0, 255.0)
         PSNR_test=10.0 * tf_log10((max_pixel ** 2) / (K.mean(K.square(denoised_image - noise_image))))
+        print("PSNR value:",PSNR_test)
         return PSNR_test
 
         if args.output_dir:
@@ -70,6 +76,8 @@ def main():
             if key == 113:
                 return 0
 
+res=main()
+print("Result:",res)
 
 if __name__ == '__main__':
     main()

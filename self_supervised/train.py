@@ -1,8 +1,9 @@
 import argparse
 import numpy as np
 from pathlib import Path
+import tensorflow as tf
 from keras import callbacks
-from keras.callbacks import LearningRateScheduler, ModelCheckpoint
+from keras.callbacks import LearningRateScheduler, ModelCheckpoint,EarlyStopping
 from keras.optimizers import Adam
 from model import get_model, PSNR, L0Loss, UpdateAnnealingParameter
 from generator import NoisyImageGenerator, ValGenerator
@@ -99,7 +100,8 @@ def main():
                                      mode="max",
                                      save_best_only=True))
     # new changes here                                 
-    earlystopping=callbacks.Earlystopping(monitor="val_loss",mode="min",patience=5,restore_best_weights=True)
+    callbacks.append(EarlyStopping(monitor="val_loss",mode="min",patience=5))
+    
                            
 
     hist = model.fit_generator(generator=generator,
@@ -107,7 +109,7 @@ def main():
                                epochs=nb_epochs,
                                validation_data=val_generator,
                                verbose=1,
-                               callbacks=[earlystopping])
+                               callbacks=callbacks)
 
     np.savez(str(output_path.joinpath("history.npz")), history=hist.history)
 
