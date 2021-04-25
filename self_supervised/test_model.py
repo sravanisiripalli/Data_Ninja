@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 import cv2
 from model import get_model
+from keras import backend as K
 from noise_model import get_noise_model
 
 
@@ -55,6 +56,9 @@ def main():
         out_image[:, :w] = image
         out_image[:, w:w * 2] = noise_image
         out_image[:, w * 2:] = denoised_image
+        max_pixel = 255.0   #changes from here
+        denoised_image = K.clip(denoised_image, 0.0, 255.0)
+        PSNR_test=10.0 * tf_log10((max_pixel ** 2) / (K.mean(K.square(denoised_image - noise_image))))
 
         if args.output_dir:
             cv2.imwrite(str(output_dir.joinpath(image_path.name))[:-4] + ".png", out_image)

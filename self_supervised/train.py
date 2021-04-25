@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 from pathlib import Path
+from keras import callbacks
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 from keras.optimizers import Adam
 from model import get_model, PSNR, L0Loss, UpdateAnnealingParameter
@@ -97,13 +98,16 @@ def main():
                                      verbose=1,
                                      mode="max",
                                      save_best_only=True))
+    # new changes here                                 
+    earlystopping=callbacks.Earlystopping(monitor="val_loss",mode="min",patience=5,restore_best_weights=True)
+                           
 
     hist = model.fit_generator(generator=generator,
                                steps_per_epoch=steps,
                                epochs=nb_epochs,
                                validation_data=val_generator,
                                verbose=1,
-                               callbacks=callbacks)
+                               callbacks=[earlystopping])
 
     np.savez(str(output_path.joinpath("history.npz")), history=hist.history)
 
