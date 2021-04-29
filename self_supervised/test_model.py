@@ -47,7 +47,7 @@ def main():
         output_dir.mkdir(parents=True, exist_ok=True)
 
     image_paths = list(Path(image_dir).glob("*.*"))
-    PSNR=[]
+    PSNR={}
     for image_path in image_paths:
         image = cv2.imread(str(image_path))
         h, w, _ = image.shape
@@ -66,7 +66,7 @@ def main():
         PSNR_test=10.0 * tf_log10((max_pixel ** 2) / (K.mean(K.square(denoised_image - noise_image))))
         print("PSNR value:",PSNR_test)
         with tf.Session() as sess_p:  
-          PSNR.append(PSNR_test.eval())
+          PSNR[image_path]=PSNR_test.eval()
           print(PSNR_test.eval())
         
 
